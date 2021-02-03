@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package blog;
+
+option go_package = "example.com/grpc/blog/gen/src;blogpb";
+
+message Article {
+  string id = 1;
+  string author_id = 2;
+  string title = 3;
+  string content = 4;
+}
+
+message ArticleMessage {
+  Article article = 1;
+}
+
+message IDMessage {
+  string id = 1;
+}
+
+service Blog {
+  rpc Create (ArticleMessage) returns (ArticleMessage) {}
+
+  rpc Read (IDMessage) returns (ArticleMessage) {}
+
+  rpc Update (ArticleMessage) returns (ArticleMessage) {}
+
+  rpc Delete (IDMessage) returns (IDMessage) {}
+}
