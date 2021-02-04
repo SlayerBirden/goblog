@@ -19,6 +19,13 @@ import (
 
 func main() {
 	c, err := initDB()
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(2*time.Second))
+		defer cancel()
+		if err = c.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
 	if err != nil {
 		log.Fatalln("Error getting Mongo client", err)
 	}
@@ -27,13 +34,9 @@ func main() {
 }
 
 func initDB() (*mongo.Client, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URI")))
-	if err != nil {
-		return nil, err
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(20*time.Second))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(2*time.Second))
 	defer cancel()
-	err = client.Connect(ctx)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGO_URI")))
 	if err != nil {
 		return nil, err
 	}

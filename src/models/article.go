@@ -29,11 +29,11 @@ func FromPB(a *pb.Article) (*Article, error) {
 }
 
 // ToPB converts Article to Protocol Buffer message
-func (a Article) ToPB() *pb.Article {
+func (m Article) ToPB() *pb.Article {
 	return &pb.Article{
-		Id:       a.ID.String(),
-		AuthorId: a.AuthorID,
-		Title:    a.Title,
-		Content:  a.Content,
+		Id:       m.ID.Hex(),
+		AuthorId: m.AuthorID,
+		Title:    m.Title,
+		Content:  m.Content,
 	}
 }
