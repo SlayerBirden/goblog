@@ -23,7 +23,7 @@ func main() {
 		log.Fatalln("Error getting Mongo client", err)
 	}
 	r := repo.NewMongoArticleRepo(c)
-	serve(r)
+	log.Fatal(serve(r))
 }
 
 func initDB() (*mongo.Client, error) {
@@ -37,20 +37,19 @@ func initDB() (*mongo.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return client, nil
 }
 
-func serve(r repo.ArticleRepo) {
+func serve(r repo.ArticleRepo): error {
 	li, err := net.Listen("tcp", os.Getenv("URI"))
 	if err != nil {
-		log.Fatalln("Failed to start listening", err)
+		return err
 	}
 	defer li.Close()
 	s := grpc.NewServer()
 	pb.RegisterBlogServer(s, server.NewBlogServer(r))
 	fmt.Println("Listening on", os.Getenv("URI"), "...")
 	if err := s.Serve(li); err != nil {
-		log.Fatalln("Error running server", err)
+		return err
 	}
 }
