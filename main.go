@@ -52,4 +52,5 @@ func serve(r repo.ArticleRepo) error {
 	if err := s.Serve(li); err != nil {
 		return err
 	}
+	return nil
 }
