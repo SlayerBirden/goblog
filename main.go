@@ -40,7 +40,7 @@ func initDB() (*mongo.Client, error) {
 	return client, nil
 }
 
-func serve(r repo.ArticleRepo): error {
+func serve(r repo.ArticleRepo) error {
 	li, err := net.Listen("tcp", os.Getenv("URI"))
 	if err != nil {
 		return err
