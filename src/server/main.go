@@ -7,6 +7,7 @@ import (
 	pb "example.com/grpc/blog/gen/src"
 	"example.com/grpc/blog/src/models"
 	"example.com/grpc/blog/src/repo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -30,11 +31,14 @@ func NewBlogServer(r repo.ArticleRepo) *BlogServer {
 }
 
 // Create implements the Create method for our Blog
-func (s *BlogServer) Create(ctx context.Context, r *pb.ArticleMessage) (*pb.ArticleMessage, error) {
+func (s *BlogServer) Create(ctx context.Context, r *pb.CreateRequest) (*pb.CreateResponse, error) {
 	a := r.GetArticle()
-	m, err := models.FromPB(a)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "There was an error retrieving article: %s", err)
+	// need to create an Article since ID should be skipped
+	m := &models.Article{
+		ID:       primitive.NilObjectID,
+		AuthorID: a.GetAuthorId(),
+		Title:    a.GetTitle(),
+		Content:  a.GetContent(),
 	}
 	id, err := s.r.AddArticle(m)
 	if err != nil {
@@ -46,5 +50,5 @@ func (s *BlogServer) Create(ctx context.Context, r *pb.ArticleMessage) (*pb.Arti
 		return nil, status.Error(codes.Canceled, "Client cancelled request, abandoning.")
 	}
 	a.Id = id
-	return &pb.ArticleMessage{Article: a}, status.Error(codes.OK, "Successfully created the article")
+	return &pb.CreateResponse{Article: a}, status.Error(codes.OK, "Successfully created the article")
 }

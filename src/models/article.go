@@ -15,16 +15,9 @@ type Article struct {
 
 // FromPB creates Article from Protocol Buffers struct definition
 func FromPB(a *pb.Article) (*Article, error) {
-	id := a.GetId()
-	var oid primitive.ObjectID
-	if id == "" {
-		oid = primitive.NilObjectID
-	} else {
-		var err error
-		oid, err = primitive.ObjectIDFromHex(a.GetId())
-		if err != nil {
-			return nil, err
-		}
+	oid, err := primitive.ObjectIDFromHex(a.GetId())
+	if err != nil {
+		return nil, err
 	}
 
 	return &Article{
