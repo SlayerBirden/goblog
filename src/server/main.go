@@ -92,3 +92,25 @@ func (s *BlogServer) List(r *pb.ListRequest, stream pb.Blog_ListServer) error {
 
 	return <-e
 }
+
+// Update an Article and returns result with updated Article
+func (s *BlogServer) Update(ctx context.Context, r *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	m, err := models.FromPB(r.GetArticle())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error updating article: %v", err)
+	}
+	res, err := s.r.UpdateArticle(ctx, m)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error updating article: %v", err)
+	}
+	return &pb.UpdateResponse{Article: res.ToPB()}, status.Error(codes.OK, "Successfully updated Article")
+}
+
+// Delete an Article by ID
+func (s *BlogServer) Delete(ctx context.Context, r *pb.DeleteRequest) (*pb.DeleteResponse, error) {
+	m, err := s.r.DeleteArticle(ctx, r.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error deleting article: %v", m)
+	}
+	return &pb.DeleteResponse{Id: m.ID.Hex()}, status.Error(codes.OK, "Successfully deleted Article")
+}

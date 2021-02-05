@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // MongoArticleRepo is the Article repository implementation in MongoDB
@@ -72,13 +73,29 @@ func (r *MongoArticleRepo) FillArticles(ctx context.Context, out chan<- models.A
 }
 
 // UpdateArticle attempts to update an article
-func (r *MongoArticleRepo) UpdateArticle(ctx context.Context, a *models.Article) error {
-	return nil
+func (r *MongoArticleRepo) UpdateArticle(ctx context.Context, a *models.Article) (*models.Article, error) {
+	res := r.c.FindOneAndUpdate(ctx, bson.M{"_id": a.ID}, bson.M{"$set": a}, options.FindOneAndUpdate().SetReturnDocument(options.After))
+	m := models.Article{}
+	err := res.Decode(&m)
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
 
 // DeleteArticle attempts to delete article by object id
-func (r *MongoArticleRepo) DeleteArticle(ctx context.Context, id string) error {
-	return nil
+func (r *MongoArticleRepo) DeleteArticle(ctx context.Context, id string) (*models.Article, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	res := r.c.FindOneAndDelete(ctx, bson.M{"_id": oid})
+	m := models.Article{}
+	err = res.Decode(&m)
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
 
 // GetArticle gets an article by ID

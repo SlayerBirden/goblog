@@ -20,10 +20,10 @@ type ArticleRepo interface {
 	AddArticle(context.Context, *models.Article) (string, error)
 
 	// UpdateArticle attempts to update an article and returns an error
-	UpdateArticle(context.Context, *models.Article) error
+	UpdateArticle(context.Context, *models.Article) (*models.Article, error)
 
-	// DeleteArticle attempts to delete an Article by ID and returns an error
-	DeleteArticle(context.Context, string) error
+	// DeleteArticle attempts to delete an Article by ID and returns deleted Article and an error
+	DeleteArticle(context.Context, string) (*models.Article, error)
 
 	// GetArticle attempts to get an Article and returns a ref to an Article and an error
 	GetArticle(context.Context, string) (*models.Article, error)
