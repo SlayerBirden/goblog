@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"example.com/grpc/blog/src/models"
@@ -37,7 +38,7 @@ func (r *MongoArticleRepo) AddArticle(ctx context.Context, a *models.Article) (i
 }
 
 // FillArticles graps documents from MongoDB and sends to "out" channel
-func (r *MongoArticleRepo) FillArticles(ctx context.Context, out chan<- models.Article, interrupt <-chan struct{}) error {
+func (r *MongoArticleRepo) FillArticles(ctx context.Context, out chan<- models.Article, stop <-chan struct{}) error {
 	defer close(out)
 	c, err := r.c.Find(ctx, bson.D{})
 	if err != nil {
@@ -49,7 +50,7 @@ func (r *MongoArticleRepo) FillArticles(ctx context.Context, out chan<- models.A
 		defer close(e)
 		for c.Next(ctx) {
 			select {
-			case <-interrupt:
+			case <-stop:
 				fmt.Println("Interrupt signal received, cancelling read")
 				e <- nil
 				return
@@ -67,6 +68,17 @@ func (r *MongoArticleRepo) FillArticles(ctx context.Context, out chan<- models.A
 			e <- err
 		}
 		e <- nil
+	}()
+
+	// We need to make sure stop can be cought after Loop is over
+	go func() {
+		for {
+			select {
+			case <-stop:
+				log.Print("got stop signal after loop")
+				return
+			}
+		}
 	}()
 
 	return <-e

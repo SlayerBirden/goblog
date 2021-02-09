@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -51,6 +52,7 @@ func serve(r repo.ArticleRepo) error {
 	defer li.Close()
 	s := grpc.NewServer()
 	pb.RegisterBlogServer(s, server.NewBlogServer(r))
+	reflection.Register(s)
 	fmt.Println("Listening on", os.Getenv("URI"), "...")
 	if err := s.Serve(li); err != nil {
 		return err
